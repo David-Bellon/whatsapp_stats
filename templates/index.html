@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-1N6H16QM6P"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-1N6H16QM6P');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="description" content="Discover fun insights and stats about your WhatsApp group! See who chats the most, track message counts, hourly activity, sticker usage, and more. Turn your group's data into interesting facts and figures with ease!">
+    <meta name="description" lang="es" content="¡Descubre datos divertidos e interesantes sobre tu grupo de WhatsApp! Ve quién charla más, cantidad de mensajes, actividad por hora, uso de stickers y más. Convierte los datos de tu grupo en hechos y cifras interesantes con facilidad.">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google-adsense-account" content="ca-pub-5030172699817686">
+    <title>WhatsApp Stats</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="icon" href="/static/favicon.ico">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7443653383215057"
+     crossorigin="anonymous"></script>
+
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">WhatsApp Stats</h1>
+        <p data-translate="welcome" class="info-message">Welcome to our WhatsApp statistics page. Get insights into your favourite WhatsApp group.</p>
+
+        <div class="user-guide">
+            <h2 data-translate="notas">Notes</h2>
+            <p data-translate="note1" class="instructions">WhatsApp only allows you to export the last 40k messages of a group chat. On top of that if there are
+            messages that may be wrong or something the program removes them. Just to clarify if later you see around
+            39.9k messages analyzed or something like. Hope you like it!</p>
+            <br>
+            <p data-translate="note2" class="instructions">The Data is not store or use outside this website. Don't worry about your
+                conversation with your friends. You are safe.&#128512;</p>
+        </div>
+
+        <div class="user-guide">
+            <h2 data-translate="guia">User Guide</h2>
+            <div class="user-guide-item">
+                <img src="/static/image1.jpg" alt="Step 1">
+                <p data-translate="step1">Step 1: Click on the three dots and then more.</p>
+            </div>
+            <div class="user-guide-item">
+                <img src="/static/image2.jpg" alt="Step 2">
+                <p data-translate="step2">Step 2: Then click on export chat.</p>
+            </div>
+            <div class="user-guide-item">
+                <img src="/static/image3.png" alt="Step 3">
+                <p data-translate="step3">Step 3: Click on without media and save it where you like.</p>
+            </div>
+            <br>
+            <div class="user-guide-item">
+                <p data-translate="step4">Now select your plaform and upload the file you just exported</p>
+            </div>
+        </div>
+
+        <div class="user-guide">
+            <h1 data-translate="plataforma">Select Your Platform</h1>
+            <div class="platform-buttons">
+                <button class="platform-button ios" onclick="trackClick('ios')">iOS</button>
+                <button class="platform-button android" onclick="trackClick('android')">Android</button>
+            </div>
+        </div>
+
+        <input type="file" id="file-input" accept=".txt" style="display: none;">
+        <label data-translate="subir" id="button-file" for="file-input" class="button" style="display: none">Upload File</label>
+
+        <!-- Display selected file name -->
+        <div id="file-name" style="display: none;"></div>
+
+        <div id="statsContainer" class="image-stats" style="display: none">
+            <div id="loader1" class="loader" style="display: none"></div>
+            <p class="instructions" id="days-init"></p>
+            <p class="instructions" id="days-end"></p>
+            <p class="instructions" id="total-msg"></p>
+        </div>
+
+        <div id="graphs1" class="image-stats" style="display: none">
+            <h2 data-translate="titulo1">Hour distribution</h2>
+            <p data-translate="descripcion1" class="description">This graph shows the number of messages sent by hour in your group.</p>
+            <div id="loader2" class="loader" style="display: none"></div>
+            <img src="" id="image1" class="images-show">
+            <p class="error-fetch" id="error-fetch1" style="display: none"> ERROR. TRY AGAIN</p>
+            <button id="get-stats-button1" class="stats-button">Show</button>
+        </div>
+
+        <div id="graphs2" class="image-stats" style="display: none">
+            <h2 data-translate="titulo2">Month distribution</h2>
+            <p data-translate="descripcion2" class="description">This graph shows the amount of messages sent each month</p>
+            <div id="loader3" class="loader" style="display: none"></div>
+            <img src="" id="image2" class="images-show">
+            <p class="error-fetch" id="error-fetch2" style="display: none"> ERROR. TRY AGAIN</p>
+            <button id="get-stats-button2" class="stats-button">Show</button>
+        </div>
+
+        <div id="graphs3" class="image-stats" style="display: none">
+            <h2 data-translate="titulo3">Days distribution</h2>
+            <p data-translate="descripcion3" class="description">Here we have the amount of messages distributed by days.</p>
+            <div id="loader4" class="loader" style="display: none"></div>
+            <img src="" id="image3" class="images-show">
+            <p class="error-fetch" id="error-fetch3" style="display: none"> ERROR. TRY AGAIN</p>
+            <button id="get-stats-button3" class="stats-button">Show</button>
+        </div>
+
+        <div id="graphs4" class="image-stats" style="display: none">
+            <h2 data-translate="titulo4">People Messages</h2>
+            <p data-translate="descripcion4" class="description">The most interesting one. Here you can see how many messages each person has sent as
+            well as the amount of multimedia (photos, images, videos and sticker all combined) sent.</p>
+            <div id="loader5" class="loader" style="display: none"></div>
+            <img src="" id="image4" class="images-show">
+            <p class="error-fetch" id="error-fetch4" style="display: none"> ERROR. TRY AGAIN</p>
+            <button id="get-stats-button4" class="stats-button">Show</button>
+        </div>
+
+        <div id="graphs5" class="image-stats" style="display: none">
+            <h2 data-translate="titulo5">Days Talk</h2>
+            <p data-translate="descripcion5" class="description">The following graph shows the total number of different days a person has talk. At
+            the top you can see the number of days in total.</p>
+            <div id="loader6" class="loader" style="display: none"></div>
+            <img src="" id="image5" class="images-show">
+            <p class="error-fetch" id="error-fetch5" style="display: none"> ERROR. TRY AGAIN</p>
+            <button id="get-stats-button5" class="stats-button">Show</button>
+        </div>
+
+        <div id="graphs6" class="image-stats" style="display: none">
+            <h2 data-translate="titulo6">No Talk Streak</h2>
+            <p data-translate="descripcion6" class="description">The graph shows the maximum days that a person has spent without sending a message
+            (this includes links, photos, videos or whatever). Go and judge your friend if you can call it like that.</p>
+            <div id="loader7" class="loader" style="display: none"></div>
+            <img src="" id="image6" class="images-show">
+            <p class="error-fetch" id="error-fetch6" style="display: none"> ERROR. TRY AGAIN</p>
+            <button id="get-stats-button6" class="stats-button">Show</button>
+        </div>
+        <button data-translate="share_stats" style="display: none" class="stats-button" id="share">Share Stats</button>
+        <div id="loader-share" class="loader" style="display: none"></div>
+        <div id="share-link" style="display: none" class="share-link-container">
+            <p data-translate="share_message">Share this link with your group:</p>
+            <input type="text" id="share-url" readonly>
+            <button onclick="copyShareLink()" class="copy-button">Copy Link</button>
+        </div>
+    </div>
+    </div>
+    <script src="/static/js/script.js"></script>
+    <script>
+        function trackClick(platform) {
+            gtag("event", "click", {
+                "event_category": "button_click",
+                "event_label": `button_${platform}`,
+            });
+        }
+
+        function copyShareLink() {
+            const shareUrl = document.getElementById('share-url');
+            shareUrl.select();
+            document.execCommand('copy');
+            alert('Link copied to clipboard!');
+        }
+
+        // Add event listener for share button
+        document.getElementById('share').addEventListener('click', async function() {
+            const fileInput = document.getElementById('file-input');
+            const platform = document.querySelector('.platform-button.selected').textContent.toLowerCase();
+            const loader = document.getElementById('loader-share');
+            const shareLink = document.getElementById('share-link');
+            
+            if (!fileInput.files.length) {
+                alert('Please select a file first');
+                return;
+            }
+
+            // Show loader and hide share link
+            loader.style.display = 'block';
+            shareLink.style.display = 'none';
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            try {
+                const response = await fetch(`/share/${platform}`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    const shareUrl = `${window.location.origin}/share/${data.share_id}`;
+                    document.getElementById('share-url').value = shareUrl;
+                    shareLink.style.display = 'block';
+                } else {
+                    alert('Error sharing stats. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error sharing stats. Please try again.');
+            } finally {
+                loader.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
