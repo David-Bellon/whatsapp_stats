@@ -329,3 +329,82 @@ function showShareButton() {
     }
 }
 
+function trackClick(platform) {
+    gtag("event", "click", {
+        "event_category": "button_click",
+        "event_label": `button_${platform}`,
+    });
+}
+
+function copyShareLink() {
+    const shareUrl = document.getElementById('share-url');
+    shareUrl.select();
+    document.execCommand('copy');
+    alert('Link copied to clipboard!');
+}
+
+// Add event listener for share button
+document.getElementById('share').addEventListener('click', async function() {
+    const loader = document.getElementById('loader-share');
+    const shareLink = document.getElementById('share-link');
+
+    // Show loader and hide share link
+    loader.style.display = 'block';
+    shareLink.style.display = 'none';
+
+    // Get all graph images and convert them to base64
+    const graphImages = document.querySelectorAll(".images-show");
+    const plots = {};
+    
+    // Map of image indices to plot names
+    const plotNames = {
+        0: 'hours',
+        1: 'months',
+        2: 'days',
+        3: 'people',
+        4: 'days_talk',
+        5: 'streak'
+    };
+
+    // Convert each image to base64 and store in plots object
+    for (let i = 0; i < graphImages.length; i++) {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const img = graphImages[i];
+        
+        // Set canvas dimensions to match image
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        
+        // Draw image to canvas
+        ctx.drawImage(img, 0, 0);
+        
+        // Get base64 string and remove the data URL prefix
+        const base64String = canvas.toDataURL('image/png').split(',')[1];
+        plots[plotNames[i]] = base64String;
+    }
+
+    try {
+        const response = await fetch('/share', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ plots: plots })
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            const shareUrl = `${window.location.origin}/share/${data.share_id}`;
+            document.getElementById('share-url').value = shareUrl;
+            shareLink.style.display = 'block';
+        } else {
+            alert('Error sharing stats. Please try again.');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Error sharing stats. Please try again.');
+    } finally {
+        loader.style.display = 'none';
+    }
+});
