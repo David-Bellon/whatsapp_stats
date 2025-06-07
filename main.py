@@ -14,6 +14,19 @@ import base64
 import uuid
 import json
 import os
+import logging
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('app.log'),
+        logging.StreamHandler()
+    ]
+)
+
+logger = logging.getLogger(__name__)
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
@@ -82,6 +95,7 @@ async def simple_stats(device: str, file: UploadFile = File(...)):
     length = len(df)
     first_date = list(df["Date"])[0]
     last_date = list(df["Date"])[-1]
+    logger.info("here")
     return {"len": length, "first": first_date, "last": last_date}
 
 @app.post("/hours/{device}")
@@ -295,29 +309,42 @@ async def streak(device: str, file: UploadFile = File(...)):
 
 @app.post("/share")
 async def share_stats(request: ShareRequest):
-    # Generate a unique ID for this share
-    share_id = str(uuid.uuid4())
-    
-    # Store the plots in a temporary file
-    with open(f'tmp/{share_id}.json', 'w') as f:
-        json.dump(request.plots, f)
-    
-    return {"share_id": share_id}
+    logger.info("Received share request")
+    try:
+        # Generate a unique ID for this share
+        share_id = str(uuid.uuid4())
+        logger.info(f"Generated share ID: {share_id}")
+        
+        # Store the plots in a temporary file
+        with open(f'tmp/{share_id}.json', 'w') as f:
+            json.dump(request.plots, f)
+        logger.info(f"Successfully stored plots for share ID: {share_id}")
+        
+        return {"share_id": share_id}
+    except Exception as e:
+        logger.error(f"Error processing share request: {str(e)}")
+        raise
 
 @app.get("/share/{share_id}")
 async def view_shared_stats(share_id: str, request: Request):
+    logger.info(f"Received request to view shared stats with ID: {share_id}")
     try:
         with open(f'tmp/{share_id}.json', 'r') as f:
             plots = json.load(f)
+        logger.info(f"Successfully retrieved plots for share ID: {share_id}")
         return templates.TemplateResponse("shared_stats.html", {
             "request": request,
             "plots": plots
         })
     except FileNotFoundError:
+        logger.error(f"Share not found for ID: {share_id}")
         return templates.TemplateResponse("error.html", {
             "request": request,
             "error": "Share not found or expired"
         })
+    except Exception as e:
+        logger.error(f"Error retrieving shared stats for ID {share_id}: {str(e)}")
+        raise
 
 if __name__ == '__main__':
     import uvicorn
