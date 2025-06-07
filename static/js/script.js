@@ -65,7 +65,12 @@ document.addEventListener("DOMContentLoaded", function () {
             fetch(`/numbers/${selectedPlatform}`, {
                 method: "POST",
                 body: formData
-            }).then(response => response.json())
+            }).then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
                 .then(data => {
                     const datesInit = document.getElementById("days-init");
                     const datesEnd = document.getElementById("days-end");
@@ -76,6 +81,11 @@ document.addEventListener("DOMContentLoaded", function () {
                     msgs.innerHTML = "Total Messages Analyzed: " + data["len"];
                     graphs1.style.display = "block";
                     getStatsButton1.style.display = "inline-block";
+                })
+                .catch(error => {
+                    loader.style.display = "none";
+                    console.error('Error fetching data:', error);
+                    alert('Failed to fetch data. Please try again.');
                 });
         } else {
             fileNameDisplay.textContent = "";

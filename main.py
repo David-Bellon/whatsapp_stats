@@ -15,6 +15,8 @@ import uuid
 import json
 import os
 import logging
+import time
+from starlette.middleware.base import BaseHTTPMiddleware
 
 # Configure logging
 logging.basicConfig(
@@ -28,7 +30,36 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
+class RequestLoggingMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        start_time = time.time()
+        
+        # Log request
+        logger.info(f"Request started: {request.method} {request.url.path} from {request.client.host}")
+        
+        try:
+            response = await call_next(request)
+            process_time = time.time() - start_time
+            
+            # Log response
+            logger.info(
+                f"Request completed: {request.method} {request.url.path} "
+                f"Status: {response.status_code} "
+                f"Time: {process_time:.2f}s"
+            )
+            
+            return response
+        except Exception as e:
+            process_time = time.time() - start_time
+            logger.error(
+                f"Request failed: {request.method} {request.url.path} "
+                f"Error: {str(e)} "
+                f"Time: {process_time:.2f}s"
+            )
+            raise
+
 app = FastAPI()
+app.add_middleware(RequestLoggingMiddleware)
 templates = Jinja2Templates(directory="templates")
 
 # Create tmp directory if it doesn't exist
@@ -46,6 +77,7 @@ class ShareRequest(BaseModel):
     plots: Dict[str, str]  # Dictionary mapping plot names to base64 strings
 
 def get_df(file_content: str, device: str) -> pd.DataFrame:
+    logger.info("Reading file")
     f = file_content
     if device == "iOS":
         f = f.split("\r")
@@ -91,11 +123,11 @@ async def privacy_policy(request: Request):
 @app.post("/numbers/{device}", response_model=StatsResponse)
 async def simple_stats(device: str, file: UploadFile = File(...)):
     content = await file.read()
+    logger.info("here")
     df = get_df(content.decode("utf-8", errors="ignore"), device)
     length = len(df)
     first_date = list(df["Date"])[0]
     last_date = list(df["Date"])[-1]
-    logger.info("here")
     return {"len": length, "first": first_date, "last": last_date}
 
 @app.post("/hours/{device}")
