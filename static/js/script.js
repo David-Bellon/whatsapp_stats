@@ -96,8 +96,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // First Button
     getStatsButton1.addEventListener("click", function () {
-        // Handle the action you want to perform when the user clicks "Get Stats"
-        //alert("Getting WhatsApp Stats...");
         const loader = document.getElementById("loader2");
         const error_msg = document.getElementById("error-fetch1");
         error_msg.style.display = "none";
@@ -113,14 +111,35 @@ document.addEventListener("DOMContentLoaded", function () {
             if (!response.ok){
                 throw new Error('Network response was not ok');
             }
-            return response.blob();
+            return response.json();
         })
-            .then(blob => {
-                const url = URL.createObjectURL(blob);
-                const image = document.getElementById('image1');
+            .then(data => {
+                // Create container for multiple images if it doesn't exist
+                let imagesContainer = document.getElementById('images-container-1');
+                if (!imagesContainer) {
+                    imagesContainer = document.createElement('div');
+                    imagesContainer.id = 'images-container-1';
+                    imagesContainer.style.display = 'flex';
+                    imagesContainer.style.flexDirection = 'column';
+                    imagesContainer.style.gap = '20px';
+                    document.getElementById('image1').parentNode.insertBefore(imagesContainer, document.getElementById('image1'));
+                }
+                
+                // Clear previous images
+                imagesContainer.innerHTML = '';
+                
+                // Add each image to the container
+                data.images.forEach((base64Image, index) => {
+                    const img = document.createElement('img');
+                    img.src = base64Image;
+                    img.style.width = '100%';
+                    img.style.height = 'auto';
+                    img.classList.add('images-show');
+                    imagesContainer.appendChild(img);
+                });
+
                 loader.style.display = "none";
-                image.src = url;
-                image.style.display = "block";
+                imagesContainer.style.display = "block";
                 getStatsButton1.style.display = "none";
                 graphs2.style.display = "block";
                 getStatsButton2.style.display = "inline-block";
@@ -136,8 +155,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Second Button
     getStatsButton2.addEventListener("click", function () {
-        // Handle the action you want to perform when the user clicks "Get Stats"
-        //alert("Getting WhatsApp Stats...");
         const loader = document.getElementById("loader3");
         const error_msg = document.getElementById("error-fetch2");
         loader.style.display = "block";
@@ -153,14 +170,32 @@ document.addEventListener("DOMContentLoaded", function () {
             if (!response.ok){
                 throw new Error('Network response was not ok');
             }
-            return response.blob();
+            return response.json();
         })
-            .then(blob => {
-                const url = URL.createObjectURL(blob);
-                const image = document.getElementById('image2');
-                image.src = url;
+            .then(data => {
+                let imagesContainer = document.getElementById('images-container-2');
+                if (!imagesContainer) {
+                    imagesContainer = document.createElement('div');
+                    imagesContainer.id = 'images-container-2';
+                    imagesContainer.style.display = 'flex';
+                    imagesContainer.style.flexDirection = 'column';
+                    imagesContainer.style.gap = '20px';
+                    document.getElementById('image2').parentNode.insertBefore(imagesContainer, document.getElementById('image2'));
+                }
+                
+                imagesContainer.innerHTML = '';
+                
+                data.images.forEach((base64Image, index) => {
+                    const img = document.createElement('img');
+                    img.src = base64Image;
+                    img.style.width = '100%';
+                    img.style.height = 'auto';
+                    img.classList.add('images-show');
+                    imagesContainer.appendChild(img);
+                });
+
                 loader.style.display = "none";
-                image.style.display = "block";
+                imagesContainer.style.display = "block";
                 getStatsButton2.style.display = "none";
                 graphs3.style.display = "block";
                 getStatsButton3.style.display = "inline-block";
@@ -176,8 +211,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Third Button
     getStatsButton3.addEventListener("click", function () {
-        // Handle the action you want to perform when the user clicks "Get Stats"
-        //alert("Getting WhatsApp Stats...");
         const loader = document.getElementById("loader4");
         const error_msg = document.getElementById("error-fetch3");
         loader.style.display = "block";
@@ -193,14 +226,32 @@ document.addEventListener("DOMContentLoaded", function () {
             if (!response.ok){
                 throw new Error('Network response was not ok');
             }
-            return response.blob();
+            return response.json();
         })
-            .then(blob => {
-                const url = URL.createObjectURL(blob);
-                const image = document.getElementById('image3');
-                image.src = url;
+            .then(data => {
+                let imagesContainer = document.getElementById('images-container-3');
+                if (!imagesContainer) {
+                    imagesContainer = document.createElement('div');
+                    imagesContainer.id = 'images-container-3';
+                    imagesContainer.style.display = 'flex';
+                    imagesContainer.style.flexDirection = 'column';
+                    imagesContainer.style.gap = '20px';
+                    document.getElementById('image3').parentNode.insertBefore(imagesContainer, document.getElementById('image3'));
+                }
+                
+                imagesContainer.innerHTML = '';
+                
+                data.images.forEach((base64Image, index) => {
+                    const img = document.createElement('img');
+                    img.src = base64Image;
+                    img.style.width = '100%';
+                    img.style.height = 'auto';
+                    img.classList.add('images-show');
+                    imagesContainer.appendChild(img);
+                });
+
                 loader.style.display = "none";
-                image.style.display = "block";
+                imagesContainer.style.display = "block";
                 getStatsButton3.style.display = "none";
                 graphs4.style.display = "block";
                 getStatsButton4.style.display = "inline-block";
@@ -214,10 +265,8 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
-    // Forth Button
+    // Fourth Button
     getStatsButton4.addEventListener("click", function () {
-        // Handle the action you want to perform when the user clicks "Get Stats"
-        //alert("Getting WhatsApp Stats...");
         const loader = document.getElementById("loader5");
         const error_msg = document.getElementById("error-fetch4");
         loader.style.display = "block";
@@ -233,14 +282,32 @@ document.addEventListener("DOMContentLoaded", function () {
             if (!response.ok){
                 throw new Error('Network response was not ok');
             }
-            return response.blob();
+            return response.json();
         })
-            .then(blob => {
-                const url = URL.createObjectURL(blob);
-                const image = document.getElementById('image4');
-                image.src = url;
+            .then(data => {
+                let imagesContainer = document.getElementById('images-container-4');
+                if (!imagesContainer) {
+                    imagesContainer = document.createElement('div');
+                    imagesContainer.id = 'images-container-4';
+                    imagesContainer.style.display = 'flex';
+                    imagesContainer.style.flexDirection = 'column';
+                    imagesContainer.style.gap = '20px';
+                    document.getElementById('image4').parentNode.insertBefore(imagesContainer, document.getElementById('image4'));
+                }
+                
+                imagesContainer.innerHTML = '';
+                
+                data.images.forEach((base64Image, index) => {
+                    const img = document.createElement('img');
+                    img.src = base64Image;
+                    img.style.width = '100%';
+                    img.style.height = 'auto';
+                    img.classList.add('images-show');
+                    imagesContainer.appendChild(img);
+                });
+
                 loader.style.display = "none";
-                image.style.display = "block";
+                imagesContainer.style.display = "block";
                 getStatsButton4.style.display = "none";
                 graphs5.style.display = "block";
                 getStatsButton5.style.display = "inline-block";
@@ -256,8 +323,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Fifth Button
     getStatsButton5.addEventListener("click", function () {
-        // Handle the action you want to perform when the user clicks "Get Stats"
-        //alert("Getting WhatsApp Stats...");
         const loader = document.getElementById("loader6");
         const error_msg = document.getElementById("error-fetch5");
         loader.style.display = "block";
@@ -273,14 +338,32 @@ document.addEventListener("DOMContentLoaded", function () {
             if (!response.ok){
                 throw new Error('Network response was not ok');
             }
-            return response.blob();
+            return response.json();
         })
-            .then(blob => {
-                const url = URL.createObjectURL(blob);
-                const image = document.getElementById('image5');
-                image.src = url;
+            .then(data => {
+                let imagesContainer = document.getElementById('images-container-5');
+                if (!imagesContainer) {
+                    imagesContainer = document.createElement('div');
+                    imagesContainer.id = 'images-container-5';
+                    imagesContainer.style.display = 'flex';
+                    imagesContainer.style.flexDirection = 'column';
+                    imagesContainer.style.gap = '20px';
+                    document.getElementById('image5').parentNode.insertBefore(imagesContainer, document.getElementById('image5'));
+                }
+                
+                imagesContainer.innerHTML = '';
+                
+                data.images.forEach((base64Image, index) => {
+                    const img = document.createElement('img');
+                    img.src = base64Image;
+                    img.style.width = '100%';
+                    img.style.height = 'auto';
+                    img.classList.add('images-show');
+                    imagesContainer.appendChild(img);
+                });
+
                 loader.style.display = "none";
-                image.style.display = "block";
+                imagesContainer.style.display = "block";
                 getStatsButton5.style.display = "none";
                 graphs6.style.display = "block";
                 getStatsButton6.style.display = "inline-block";
@@ -294,10 +377,8 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
-    //Sixth Button
+    // Sixth Button
     getStatsButton6.addEventListener("click", function () {
-        // Handle the action you want to perform when the user clicks "Get Stats"
-        //alert("Getting WhatsApp Stats...");
         const loader = document.getElementById("loader7");
         const error_msg = document.getElementById("error-fetch6");
         loader.style.display = "block";
@@ -313,14 +394,32 @@ document.addEventListener("DOMContentLoaded", function () {
             if (!response.ok){
                 throw new Error('Network response was not ok');
             }
-            return response.blob();
+            return response.json();
         })
-            .then(blob => {
-                const url = URL.createObjectURL(blob);
-                const image = document.getElementById('image6');
-                image.src = url;
+            .then(data => {
+                let imagesContainer = document.getElementById('images-container-6');
+                if (!imagesContainer) {
+                    imagesContainer = document.createElement('div');
+                    imagesContainer.id = 'images-container-6';
+                    imagesContainer.style.display = 'flex';
+                    imagesContainer.style.flexDirection = 'column';
+                    imagesContainer.style.gap = '20px';
+                    document.getElementById('image6').parentNode.insertBefore(imagesContainer, document.getElementById('image6'));
+                }
+                
+                imagesContainer.innerHTML = '';
+                
+                data.images.forEach((base64Image, index) => {
+                    const img = document.createElement('img');
+                    img.src = base64Image;
+                    img.style.width = '100%';
+                    img.style.height = 'auto';
+                    img.classList.add('images-show');
+                    imagesContainer.appendChild(img);
+                });
+
                 loader.style.display = "none";
-                image.style.display = "block";
+                imagesContainer.style.display = "block";
                 getStatsButton6.style.display = "none";
                 showShareButton();
             }).catch(error => {
@@ -333,8 +432,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
 // Show share button when all graphs are loaded
 function showShareButton() {
-    const allGraphsLoaded = document.querySelectorAll('.images-show').length === 6;
-    if (allGraphsLoaded) {
+    const allImages = document.querySelectorAll('.images-show');
+    const totalImages = allImages.length;
+    
+    // Log for debugging
+    console.log(`Total images found: ${totalImages}`);
+    
+    // Show share button if we have at least one image
+    if (totalImages > 0) {
         document.getElementById('share').style.display = 'block';
     }
 }
@@ -366,33 +471,52 @@ document.getElementById('share').addEventListener('click', async function() {
     const graphImages = document.querySelectorAll(".images-show");
     const plots = {};
     
-    // Map of image indices to plot names
+    // Map of container IDs to plot names
     const plotNames = {
-        0: 'hours',
-        1: 'months',
-        2: 'days',
-        3: 'people',
-        4: 'days_talk',
-        5: 'streak'
+        'images-container-1': 'hours',
+        'images-container-2': 'months',
+        'images-container-3': 'days',
+        'images-container-4': 'people',
+        'images-container-5': 'days_talk',
+        'images-container-6': 'streak'
     };
 
-    // Convert each image to base64 and store in plots object
-    for (let i = 0; i < graphImages.length; i++) {
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        const img = graphImages[i];
-        
-        // Set canvas dimensions to match image
-        canvas.width = img.naturalWidth;
-        canvas.height = img.naturalHeight;
-        
-        // Draw image to canvas
-        ctx.drawImage(img, 0, 0);
-        
-        // Get base64 string and remove the data URL prefix
-        const base64String = canvas.toDataURL('image/png').split(',')[1];
-        plots[plotNames[i]] = base64String;
+    // Group images by their container
+    const imagesByContainer = {};
+    graphImages.forEach(img => {
+        const container = img.closest('[id^="images-container-"]');
+        if (container) {
+            if (!imagesByContainer[container.id]) {
+                imagesByContainer[container.id] = [];
+            }
+            imagesByContainer[container.id].push(img);
+        }
+    });
+
+    // Convert images to base64 and store in plots object
+    for (const [containerId, images] of Object.entries(imagesByContainer)) {
+        const plotName = plotNames[containerId];
+        if (plotName) {
+            plots[plotName] = [];
+            for (const img of images) {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                
+                // Set canvas dimensions to match image
+                canvas.width = img.naturalWidth;
+                canvas.height = img.naturalHeight;
+                
+                // Draw image to canvas
+                ctx.drawImage(img, 0, 0);
+                
+                // Get base64 string and remove the data URL prefix
+                const base64String = canvas.toDataURL('image/png').split(',')[1];
+                plots[plotName].push(base64String);
+            }
+        }
     }
+
+    console.log(plots);
 
     try {
         const response = await fetch('/share', {

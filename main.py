@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Request, File, UploadFile
-from fastapi.responses import HTMLResponse, FileResponse, StreamingResponse
+from fastapi.responses import HTMLResponse, StreamingResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 import re
@@ -17,6 +17,7 @@ import os
 import logging
 import time
 from starlette.middleware.base import BaseHTTPMiddleware
+import numpy as np
 
 # Configure logging
 logging.basicConfig(
@@ -74,7 +75,7 @@ class StatsResponse(BaseModel):
     last: str
 
 class ShareRequest(BaseModel):
-    plots: Dict[str, str]  # Dictionary mapping plot names to base64 strings
+    plots: Dict[str, List[str]]  # Dictionary mapping plot names to arrays of base64 strings
 
 def get_df(file_content: str, device: str) -> pd.DataFrame:
     logger.info("Reading file")
@@ -112,6 +113,93 @@ def get_df(file_content: str, device: str) -> pd.DataFrame:
     df["Message"] = message
     return df
 
+
+def plot_years_stacked(variable, years, values, x_label, y_label, title):
+    # Stacked plot
+    plt.figure(figsize=(12, 10))
+    bottom = np.zeros(len(variable))  # to stack bars
+    for i, year in enumerate(years):
+        bars = plt.bar(variable, values[:, i], bottom=bottom, label=str(year), width=0.9)
+        # Add data labels on each bar segment
+        for bar in bars:
+            height = bar.get_height()
+            if height > 0:  # only label bars with positive height
+                plt.text(
+                    bar.get_x() + bar.get_width() / 2,  # x position: center of the bar
+                    bar.get_y() + height / 2,           # y position: middle of the bar segment
+                    f'{int(height)}',                   # label text (integer)
+                    ha='center', va='center', fontsize=9, color='white'
+                )
+        bottom += values[:, i]
+
+    plt.title(title, fontsize=16)
+    plt.xlabel(x_label)
+    plt.ylabel(y_label)
+    plt.legend(title="Año")
+    plt.xticks(variable)
+    plt.tight_layout()
+    img_buffer = BytesIO()
+    plt.savefig(img_buffer, format='png')
+    img_buffer.seek(0)
+
+    return f"data:image/png;base64,{base64.b64encode(img_buffer.read()).decode('utf-8')}"
+
+
+def plot_years_line(df, variable_name, x_label, y_label, title):
+    df_plot = df.set_index(variable_name)
+    df_plot = df_plot.T 
+
+    # Plot
+    plt.figure(figsize=(16, 10))  # Adjust figure size as needed
+
+    for name in df_plot.columns:
+        plt.plot(df_plot.index, df_plot[name], marker='o', label=name)
+
+    # Labels and title
+    plt.title(title, fontsize=16)
+    plt.xlabel(x_label, fontsize=12)
+    plt.ylabel(y_label, fontsize=12)
+    plt.legend(title="Name")  # Move legend outside
+    plt.grid(False)
+    plt.tight_layout()
+    img_buffer = BytesIO()
+    plt.savefig(img_buffer, format='png')
+    img_buffer.seek(0)
+
+    return f"data:image/png;base64,{base64.b64encode(img_buffer.read()).decode('utf-8')}"
+
+
+def plot_all_data(variable, years, values, x_label, y_label, title):
+    # Each Year Images
+    encoded_images = []
+    for i, year in enumerate(years):
+        plt.figure(figsize=(12, 10))
+        bars = plt.bar(variable, values[:, i], label=str(year), width=0.9)
+        # Add data labels on each bar segment
+        for bar in bars:
+            height = bar.get_height()
+            if height > 0:  # only label bars with positive height
+                plt.text(
+                    bar.get_x() + bar.get_width() / 2,  # x position: center of the bar
+                    bar.get_y() + height * 0.95,           # y position: middle of the bar segment
+                    f'{int(height)}',                   # label text (integer)
+                    ha='center', va='center', fontsize=10, color='white'
+                )
+
+        plt.xlabel(x_label)
+        plt.ylabel(y_label)
+        plt.legend(title="Año")
+        plt.xticks(variable)
+        plt.tight_layout()
+        img_buffer = BytesIO()
+        plt.savefig(img_buffer, format='png')
+        img_buffer.seek(0)
+
+        encoded_images.append(f"data:image/png;base64,{base64.b64encode(img_buffer.read()).decode('utf-8')}")
+
+    return encoded_images
+
+
 @app.get("/", response_class=HTMLResponse)
 async def main_page(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
@@ -134,32 +222,31 @@ async def simple_stats(device: str, file: UploadFile = File(...)):
 async def hour_dist(device: str, file: UploadFile = File(...)):
     content = await file.read()
     df = get_df(content.decode("utf-8"), device)
-    hours = df["Hour"]
-    dict_hours = {}
-    for hour in hours:
-        hole = int(hour.split(":")[0])
-        if hole in list(dict_hours.keys()):
-            dict_hours[hole] += 1
-        else:
-            dict_hours[hole] = 0
+    df["Date"] = pd.to_datetime(df["Date"], format='%d/%m/%y')
+    df["Year"] = df["Date"].dt.year
+    df["Hour"] = df["Hour"].str.split(":").str[0].astype(int)
 
-    plt.figure(figsize=(10, 10))
-    bars = plt.bar(list(dict_hours.keys()), list(dict_hours.values()))
-    plt.xlabel("Horas")
-    plt.ylabel("Numero Mensajes")
-    plt.xticks(list(dict_hours.keys()), list(dict_hours.keys()))
-    plt.bar_label(bars)
-    img_buffer = BytesIO()
-    plt.savefig(img_buffer, format='png')
-    img_buffer.seek(0)
-    plt.clf()
-    return StreamingResponse(img_buffer, media_type='image/png')
+    group_by = df.groupby(["Hour", "Year"]).count().reset_index()
+    df_pivot = group_by.pivot(index='Hour', columns='Year', values='Message').reset_index().fillna(0)
+    print(df_pivot)
+
+    encoded_images = []
+
+    hours = df_pivot['Hour']
+    years = df_pivot.columns[1:]  # exclude 'Hour'
+    values = df_pivot[years].fillna(0).to_numpy()
+    
+    encoded_images.append(plot_years_stacked(hours, years, values, x_label="Horas", y_label="Numero Mensajes", title="Mensajes por Hora"))
+    for image in plot_all_data(hours, years, values, x_label="Horas", y_label="Numero Mensajes", title="Mensajes por Hora"):
+        encoded_images.append(image)
+    
+    plt.close()
+    return JSONResponse(content={"images": encoded_images})
 
 @app.post("/months/{device}")
 async def month_dist(device: str, file: UploadFile = File(...)):
     content = await file.read()
     df = get_df(content.decode("utf-8"), device)
-    dates = df["Date"]
     month_names = {
         1: "Enero",
         2: "Febrero",
@@ -174,31 +261,33 @@ async def month_dist(device: str, file: UploadFile = File(...)):
         11: "Noviembre",
         12: "Diciembre"
     }
-    dict_date = {}
-    for date in dates:
-        month = int(date.split("/")[1])
-        if month in list(dict_date.keys()):
-            dict_date[month] += 1
-        else:
-            dict_date[month] = 0
-    for i in list(dict_date.keys()):
-        dict_date[month_names[i]] = dict_date.pop(i)
-    plt.figure(figsize=(10, 10))
-    bars = plt.bar(list(dict_date.keys()), list(dict_date.values()))
-    plt.xlabel("Mes")
-    plt.ylabel("Numero Mensajes")
-    plt.bar_label(bars)
-    img_buffer = BytesIO()
-    plt.savefig(img_buffer, format='png')
-    img_buffer.seek(0)
-    plt.clf()
-    return StreamingResponse(img_buffer, media_type='image/png')
+    df["Date"] = pd.to_datetime(df["Date"], format='%d/%m/%y')
+    df["Month"] = df["Date"].dt.month
+    df["Year"] = df["Date"].dt.year
+
+    group_by = df.groupby(["Month", "Year"]).count().reset_index()
+    df_pivot = group_by.pivot(index='Month', columns='Year', values='Message').reset_index().fillna(0)
+    df_pivot["Month"] = df_pivot["Month"].map(month_names)
+    print(df_pivot)
+    
+    encoded_images = []
+
+    months = df_pivot['Month']
+    years = df_pivot.columns[1:]
+    values = df_pivot[years].fillna(0).to_numpy()
+    
+    encoded_images.append(plot_years_stacked(months, years, values, x_label="Mes", y_label="Numero Mensajes", title="Mensajes por Mes"))
+    for image in plot_all_data(months, years, values, x_label="Mes", y_label="Numero Mensajes", title="Mensajes por Mes"):
+        encoded_images.append(image)
+
+    
+    plt.close()
+    return JSONResponse(content={"images": encoded_images})
 
 @app.post("/dayDist/{device}")
 async def day_dist(device: str, file: UploadFile = File(...)):
     content = await file.read()
     df = get_df(content.decode("utf-8"), device)
-    dates = df["Date"]
     day_names = {
         0: "L",
         1: "M",
@@ -208,102 +297,82 @@ async def day_dist(device: str, file: UploadFile = File(...)):
         5: "S",
         6: "D"
     }
-    dict_day = {
-        0: 0,
-        1: 0,
-        2: 0,
-        3: 0,
-        4: 0,
-        5: 0,
-        6: 0
-    }
-    for date in dates:
-        day = datetime.datetime(int(date.split("/")[-1]), int(date.split("/")[1]), int(date.split("/")[0])).weekday()
-        if day in list(dict_day.keys()):
-            dict_day[day] += 1
-        else:
-            dict_day[day] = 0
-    for i in list(dict_day.keys()):
-        dict_day[day_names[i]] = dict_day.pop(i)
-    plt.figure(figsize=(10, 10))
-    bars = plt.bar(list(dict_day.keys()), list(dict_day.values()))
-    plt.xlabel("Dia")
-    plt.ylabel("Numero Mensajes")
-    plt.bar_label(bars)
-    img_buffer = BytesIO()
-    plt.savefig(img_buffer, format='png')
-    img_buffer.seek(0)
-    plt.clf()
-    return StreamingResponse(img_buffer, media_type='image/png')
+    df["Date"] = pd.to_datetime(df["Date"], format='%d/%m/%y')
+    df["WeekDay"] = df["Date"].dt.weekday
+    df["Year"] = df["Date"].dt.year
+
+    group_by = df.groupby(["WeekDay", "Year"]).count().reset_index()
+    df_pivot = group_by.pivot(index='WeekDay', columns='Year', values='Message').reset_index().fillna(0)
+    df_pivot["WeekDay"] = df_pivot["WeekDay"].map(day_names)
+    print(df_pivot)
+
+    encoded_images = []
+
+    week_days = df_pivot['WeekDay']
+    years = df_pivot.columns[1:]
+    values = df_pivot[years].fillna(0).to_numpy()
+    
+    encoded_images.append(plot_years_stacked(week_days, years, values, x_label="Dia Semana", y_label="Numero Mensajes", title="Mensajes por Dia de la Semana"))
+    for image in plot_all_data(week_days, years, values, x_label="Dia Semana", y_label="Numero Mensajes", title="Mensajes por Dia de la Semana"):
+        encoded_images.append(image)
+
+    plt.close()
+    return JSONResponse(content={"images": encoded_images})
 
 @app.post("/eachPerson/{device}")
 async def each_person(device: str, file: UploadFile = File(...)):
     content = await file.read()
     df = get_df(content.decode("utf-8"), device)
-    in_group = list(df["Name"].unique())
-    names = df["Name"]
-    dict_names = {}
-    for name in names:
-        if name in in_group:
-            if name in list(dict_names.keys()):
-                dict_names[name] += 1
-            else:
-                dict_names[name] = 0
+    df["Date"] = pd.to_datetime(df["Date"], format='%d/%m/%y')
+    df["Year"] = df["Date"].dt.year
+    df["Is_Multimedia"] = df["Message"].str.startswith("<", na=False)
 
-    df_only_mul = df.loc[df["Message"].str[0] == "<"]
-    mul_names = {}
-    for guy in in_group:
-        own_mes = df_only_mul.loc[df_only_mul["Name"] == guy]
-        mul_names[guy] = len(own_mes)
-    plt.figure(figsize=(10, 10))
-    bars = plt.bar(list(dict_names.keys()), list(dict_names.values()), label="Mensajes Totales")
-    plt.bar(list(mul_names.keys()), list(mul_names.values()), label="Mensajes Multimedia")
-    plt.legend()
-    plt.xlabel("Persona")
-    plt.ylabel("Numero Mensajes")
-    plt.bar_label(bars)
-    img_buffer = BytesIO()
-    plt.savefig(img_buffer, format='png')
-    img_buffer.seek(0)
+    group_by = df.groupby(["Name", "Year"]).count().reset_index()
+    df_pivot = group_by.pivot(index='Name', columns='Year', values='Message').reset_index().fillna(0)
+    print(df_pivot)
+
+    encoded_images = []
+
+    names = df_pivot['Name']
+    years = df_pivot.columns[1:]
+    values = df_pivot[years].fillna(0).to_numpy()
+
+    encoded_images.append(plot_years_stacked(names, years, values, x_label="Persona", y_label="Numero Mensajes", title="Mensajes por Persona"))
+    encoded_images.append(plot_years_line(df_pivot, variable_name="Name", x_label="Años", y_label="Numero Mensajes", title="Mensajes Enviados por Año por Persona"))
+
+    df = df.loc[df["Is_Multimedia"] == True]
+    group_by = df.groupby(["Name", "Year"]).count().reset_index()
+    df_pivot = group_by.pivot(index='Name', columns='Year', values='Message').reset_index().fillna(0)
+    print(df_pivot)
+    names = df_pivot['Name']
+    years = df_pivot.columns[1:]
+    values = df_pivot[years].fillna(0).to_numpy()
+    encoded_images.append(plot_years_stacked(names, years, values, x_label="Persona", y_label="Numero Mensajes Multimedia", title="Mensajes Multimedia Enviados por Año por Persona"))
+    encoded_images.append(plot_years_line(df_pivot, variable_name="Name", x_label="Años", y_label="Numero Mensajes Multimedia", title="Mensajes Multimedia Enviados por Año por Persona"))
+
     plt.clf()
-    return StreamingResponse(img_buffer, media_type='image/png')
+    return JSONResponse(content={"images": encoded_images})
 
 @app.post("/noMess/{device}")
 async def no_message(device: str, file: UploadFile = File(...)):
     content = await file.read()
     df = get_df(content.decode("utf-8"), device)
-    in_group = list(df["Name"].unique())
-    days_talk = {}
-    for name in in_group:
-        person_df = df.loc[df["Name"] == name]
-        days_talk[name] = len(set(person_df['Date']))
+    df["Date"] = pd.to_datetime(df["Date"], format='%d/%m/%y')
+    df["Year"] = df["Date"].dt.year
 
-    dict_days_max_no_talk = {}
-    for name in in_group:
-        person_df = df.loc[df["Name"] == name]
-        dates = list(person_df["Date"])
-        dict_days_max_no_talk[name] = 0
-        for i in range(1, len(dates)):
-            previous_date_split = dates[i-1].split("/")
-            current_date_split = dates[i].split("/")
-            previous_day = datetime.datetime(int(previous_date_split[2]), int(previous_date_split[1]), int(previous_date_split[0]))
-            current_day = datetime.datetime(int(current_date_split[2]), int(current_date_split[1]), int(current_date_split[0]))
-            if (current_day - previous_day).days > 1:
-                if (current_day - previous_day).days > dict_days_max_no_talk[name]:
-                    dict_days_max_no_talk[name] = (current_day - previous_day).days
+    group_by = df.groupby(["Name", "Year"]).apply(lambda x: len(set(x["Date"]))).reset_index()
+    df_pivot = group_by.pivot(index='Name', columns='Year', values=0).reset_index().fillna(0)
+    print(df_pivot)
+    
+    encoded_images = []
+    names = df_pivot['Name']
+    years = df_pivot.columns[1:]
+    values = df_pivot[years].fillna(0).to_numpy()
 
-    plt.figure(figsize=(10, 10))
-    bars = plt.bar(list(days_talk.keys()), list(days_talk.values()), label="Dias hablados")
-    plt.legend()
-    plt.title(f"Maximo Numero de Días = {len(list(df['Date'].unique()))} dias")
-    plt.xlabel("Persona")
-    plt.ylabel("Dias")
-    plt.bar_label(bars)
-    img_buffer = BytesIO()
-    plt.savefig(img_buffer, format='png')
-    img_buffer.seek(0)
+    encoded_images.append(plot_years_stacked(names, years, values, x_label="Personas", y_label="Dias Hablados", title="Días Hablados por Persona"))
+    encoded_images.append(plot_years_line(df_pivot, "Name", x_label="Años", y_label="Dias Hablados", title="Días Hablados por Persona"))
     plt.clf()
-    return StreamingResponse(img_buffer, media_type='image/png')
+    return JSONResponse(content={"images": encoded_images})
 
 @app.post("/streak/{device}")
 async def streak(device: str, file: UploadFile = File(...)):
@@ -337,7 +406,10 @@ async def streak(device: str, file: UploadFile = File(...)):
     plt.savefig(img_buffer, format='png')
     img_buffer.seek(0)
     plt.clf()
-    return StreamingResponse(img_buffer, media_type='image/png')
+
+    encoded_images = []
+    encoded_images.append(f"data:image/png;base64,{base64.b64encode(img_buffer.read()).decode('utf-8')}")
+    return JSONResponse(content={"images": encoded_images})
 
 @app.post("/share")
 async def share_stats(request: ShareRequest):
@@ -366,7 +438,15 @@ async def view_shared_stats(share_id: str, request: Request):
         logger.info(f"Successfully retrieved plots for share ID: {share_id}")
         return templates.TemplateResponse("shared_stats.html", {
             "request": request,
-            "plots": plots
+            "plots": plots,
+            "plot_names": {
+                'hours': 'Messages by Hour',
+                'months': 'Messages by Month',
+                'days': 'Messages by Day of Week',
+                'people': 'Messages by Person',
+                'days_talk': 'Days Talked by Person',
+                'streak': 'Longest Streak Without Talking'
+            }
         })
     except FileNotFoundError:
         logger.error(f"Share not found for ID: {share_id}")
