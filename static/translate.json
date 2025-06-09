@@ -1,7 +1,7 @@
 {
   "welcome": "Bienvenido a nuestra página de datos de WhatsApp. Obten información de tu grupo de WhatsApp favorito.",
   "notas": "Notas",
-  "note1": "WhatsApp solo deja exportar los últimos 40k mensajes de un grupo, además el programa se encarga de limpiar aquellos con problemas. Por si más adelante ves que analiza 39.9k mensajes. Espero que te guste!",
+  "note1": "WhatsApp te permite exportar todos los mensajes de un grupo desde el día que entraste a el. Aunque el programa limpia algunos mensajes defectuosos, si tu conversación tiene varios años y muchos mensajes, los gráficos pueden tardar hasta unos 7 segundos en cargarse. Espero que te guste!",
   "note2": "Los datos de tu conversación no se almacenan ni se procesan fuera de esta página. Tus conversaciones con tus amigos está a salvo",
   "guia": "Guia de Uso",
   "step1": "Paso 1: Pincha en los tres puntos y luego en más",
