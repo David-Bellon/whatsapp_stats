@@ -9,7 +9,12 @@ document.addEventListener("DOMContentLoaded", function () {
           document.querySelectorAll('[data-translate]').forEach(element => {
             const key = element.getAttribute('data-translate');
             if (data[key]) {
-              element.textContent = data[key];
+              // Use innerHTML for keys that may contain HTML
+              if (key === 'transparency_note') {
+                element.innerHTML = data[key];
+              } else {
+                element.textContent = data[key];
+              }
             }
           });
         })
@@ -434,13 +439,21 @@ document.addEventListener("DOMContentLoaded", function () {
 function showShareButton() {
     const allImages = document.querySelectorAll('.images-show');
     const totalImages = allImages.length;
-    
     // Log for debugging
     console.log(`Total images found: ${totalImages}`);
-    
     // Show share button if we have at least one image
     if (totalImages > 0) {
         document.getElementById('share').style.display = 'block';
+        // Show the share warning with fade-in
+        const shareWarning = document.getElementById('share-warning-msg');
+        if (shareWarning) {
+            shareWarning.style.display = 'block';
+            shareWarning.style.opacity = 0;
+            setTimeout(() => {
+                shareWarning.style.transition = 'opacity 0.7s';
+                shareWarning.style.opacity = 1;
+            }, 10);
+        }
     }
 }
 

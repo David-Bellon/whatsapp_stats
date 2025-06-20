@@ -21,6 +21,8 @@
   "titulo5": "Total días hablados",
   "descripcion5": "Días activos por persona. Una buena forma de descubrir quienes son los que mas participan",
   "titulo6": "Racha días sin hablar",
-  "descripcion6": "Aquí tienes el récord personal de silencio: el máximo número de días seguidos que ha pasado cada miembro sin decir absolutamente nada. Ni un “jajaja”, ni un sticker ni nada. Juzgad a vuestro amigo el que no habla y decidid si se queda o no en el grupo",
-  "download_pdf": "Descargar los datos en PDF"
+  "descripcion6": "Aquí tienes el récord personal de silencio: el máximo número de días seguidos que ha pasado cada miembro sin decir absolutamente nada. Ni un 'jajaja', ni un sticker ni nada. Juzgad a vuestro amigo el que no habla y decidid si se queda o no en el grupo",
+  "download_pdf": "Descargar los datos en PDF",
+  "transparency_note": "Por transparencia y para comprobar que no se guardan los mensajes, puedes ver el código fuente de esta página <a href=\"https://github.com/YOUR_GITHUB_USERNAME/YOUR_REPO_NAME\" target=\"_blank\" rel=\"noopener noreferrer\">aquí</a>.",
+  "share_warning": "Al generar el enlace para compartir con tus amigos, los gráficos de arriba se almacenarán durante 30 días antes de ser eliminados. Esto es lo único que se almacena y no contiene datos relevantes."
 }

@@ -78,7 +78,6 @@ class ShareRequest(BaseModel):
     plots: Dict[str, List[str]]  # Dictionary mapping plot names to arrays of base64 strings
 
 def get_df(file_content: str, device: str) -> pd.DataFrame:
-    logger.info("Reading file")
     f = file_content
     if device == "iOS":
         f = f.split("\r")
@@ -211,7 +210,6 @@ async def privacy_policy(request: Request):
 @app.post("/numbers/{device}", response_model=StatsResponse)
 async def simple_stats(device: str, file: UploadFile = File(...)):
     content = await file.read()
-    logger.info("here")
     df = get_df(content.decode("utf-8", errors="ignore"), device)
     length = len(df)
     first_date = list(df["Date"])[0]
@@ -228,7 +226,6 @@ async def hour_dist(device: str, file: UploadFile = File(...)):
 
     group_by = df.groupby(["Hour", "Year"]).count().reset_index()
     df_pivot = group_by.pivot(index='Hour', columns='Year', values='Message').reset_index().fillna(0)
-    print(df_pivot)
 
     encoded_images = []
 
@@ -268,7 +265,6 @@ async def month_dist(device: str, file: UploadFile = File(...)):
     group_by = df.groupby(["Month", "Year"]).count().reset_index()
     df_pivot = group_by.pivot(index='Month', columns='Year', values='Message').reset_index().fillna(0)
     df_pivot["Month"] = df_pivot["Month"].map(month_names)
-    print(df_pivot)
     
     encoded_images = []
 
@@ -304,7 +300,6 @@ async def day_dist(device: str, file: UploadFile = File(...)):
     group_by = df.groupby(["WeekDay", "Year"]).count().reset_index()
     df_pivot = group_by.pivot(index='WeekDay', columns='Year', values='Message').reset_index().fillna(0)
     df_pivot["WeekDay"] = df_pivot["WeekDay"].map(day_names)
-    print(df_pivot)
 
     encoded_images = []
 
@@ -329,7 +324,6 @@ async def each_person(device: str, file: UploadFile = File(...)):
 
     group_by = df.groupby(["Name", "Year"]).count().reset_index()
     df_pivot = group_by.pivot(index='Name', columns='Year', values='Message').reset_index().fillna(0)
-    print(df_pivot)
 
     encoded_images = []
 
@@ -343,7 +337,6 @@ async def each_person(device: str, file: UploadFile = File(...)):
     df = df.loc[df["Is_Multimedia"] == True]
     group_by = df.groupby(["Name", "Year"]).count().reset_index()
     df_pivot = group_by.pivot(index='Name', columns='Year', values='Message').reset_index().fillna(0)
-    print(df_pivot)
     names = df_pivot['Name']
     years = df_pivot.columns[1:]
     values = df_pivot[years].fillna(0).to_numpy()
@@ -362,7 +355,6 @@ async def no_message(device: str, file: UploadFile = File(...)):
 
     group_by = df.groupby(["Name", "Year"]).apply(lambda x: len(set(x["Date"]))).reset_index()
     df_pivot = group_by.pivot(index='Name', columns='Year', values=0).reset_index().fillna(0)
-    print(df_pivot)
     
     encoded_images = []
     names = df_pivot['Name']
