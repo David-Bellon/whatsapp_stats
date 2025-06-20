@@ -2,7 +2,7 @@
   "welcome": "Bienvenido a nuestra página de datos de WhatsApp. Obten información de tu grupo de WhatsApp favorito.",
   "notas": "Notas",
   "note1": "WhatsApp te permite exportar todos los mensajes de un grupo desde el día que entraste a el. Aunque el programa limpia algunos mensajes defectuosos, si tu conversación tiene varios años y muchos mensajes, los gráficos pueden tardar hasta unos 7 segundos en cargarse. Espero que te guste!",
-  "note2": "Los datos de tu conversación no se almacenan ni se procesan fuera de esta página. Tus conversaciones con tus amigos está a salvo",
+  "note2": "Los datos de tu conversación no se almacenan ni se procesan fuera de esta página. Nadie puede leer tus mensajes de ninguna manera. Tus conversaciones con tus amigos están a salvo",
   "guia": "Guia de Uso",
   "step1": "Paso 1: Pincha en los tres puntos y luego en más",
   "step2": "Paso 2: Luego pincha en Exportar chat",
@@ -23,6 +23,8 @@
   "titulo6": "Racha días sin hablar",
   "descripcion6": "Aquí tienes el récord personal de silencio: el máximo número de días seguidos que ha pasado cada miembro sin decir absolutamente nada. Ni un 'jajaja', ni un sticker ni nada. Juzgad a vuestro amigo el que no habla y decidid si se queda o no en el grupo",
   "download_pdf": "Descargar los datos en PDF",
-  "transparency_note": "Por transparencia y para comprobar que no se guardan los mensajes, puedes ver el código fuente de esta página <a href=\"https://github.com/YOUR_GITHUB_USERNAME/YOUR_REPO_NAME\" target=\"_blank\" rel=\"noopener noreferrer\">aquí</a>.",
-  "share_warning": "Al generar el enlace para compartir con tus amigos, los gráficos de arriba se almacenarán durante 30 días antes de ser eliminados. Esto es lo único que se almacena y no contiene datos relevantes."
+  "transparency_note": "Por transparencia y para comprobar que no se guardan los mensajes, puedes ver el código fuente de esta página <a href=\"https://github.com/David-Bellon/whatsapp_stats\" target=\"_blank\" rel=\"noopener noreferrer\">aquí</a>.",
+  "share_warning": "Al generar el enlace para compartir con tus amigos, los gráficos de arriba se almacenarán durante 30 días antes de ser eliminados. Esto es lo único que se almacena y no contiene datos relevantes.",
+  "privacy_share_note": "SOLAMENTE si decides <span class=\"highlight-share\">compartir tus estadísticas con amigos <span class=\"emoji\">🔗</span></span>, solo los gráficos (que son solo imágenes y no contienen datos relevantes de texto ni mensajes) se almacenarán durante 30 días. Compartir es completamente opcional.",
+  "privacy": "Privacidad"
 }

@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const key = element.getAttribute('data-translate');
             if (data[key]) {
               // Use innerHTML for keys that may contain HTML
-              if (key === 'transparency_note') {
+              if (key === 'transparency_note' || key === 'privacy_share_note') {
                 element.innerHTML = data[key];
               } else {
                 element.textContent = data[key];
